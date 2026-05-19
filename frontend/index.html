@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- SEO -->
+  <title>CO₂ Emission Predictor | Simple Linear Regression Portfolio</title>
+  <meta name="description"
+        content="Predict vehicle CO₂ emissions using Simple Linear Regression trained on the FuelConsumptionCo2 dataset. Beginner ML portfolio project built with Flask & scikit-learn." />
+
+  <!-- Favicon (emoji fallback) -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌿</text></svg>" />
+
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<div class="app-wrapper">
+
+  <!-- ══════════════════════════════════════
+       HEADER
+  ══════════════════════════════════════ -->
+  <header class="app-header">
+    <div class="header-badge">
+      <span class="dot"></span>
+      ML Portfolio Project
+    </div>
+
+    <h1>CO₂ Emission Predictor</h1>
+    <p class="subtitle">Simple Linear Regression &nbsp;·&nbsp; Beginner ML Portfolio &nbsp;·&nbsp; scikit-learn 1.6.0</p>
+
+    <div class="header-stats">
+      <div class="stat-item">
+        <div class="stat-val">1 067</div>
+        <div class="stat-lbl">Vehicles in dataset</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-val">80 / 20</div>
+        <div class="stat-lbl">Train / Test split</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-val">0.76</div>
+        <div class="stat-lbl">R² Score (Engine)</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-val">2</div>
+        <div class="stat-lbl">Features trained</div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ══════════════════════════════════════
+       ROW 1 — PREDICTION INPUT + RESULT
+  ══════════════════════════════════════ -->
+  <div class="grid-2 section">
+
+    <!-- SECTION 2 — Prediction Input -->
+    <div class="card input-card" id="input-card">
+      <h2 class="card-title">
+        <span class="icon icon-blue">⚡</span>
+        Predict CO₂ Emission
+      </h2>
+
+      <!-- Field 1: Engine Size -->
+      <div class="input-group">
+        <label for="engineSize">
+          Engine Size (L)
+          <span class="range-hint">Range: 0.9 – 8.4 L</span>
+        </label>
+        <input
+          id="engineSize"
+          class="input-field"
+          type="number"
+          min="0.9"
+          max="8.4"
+          step="0.1"
+          placeholder="e.g. 2.0"
+          autocomplete="off"
+        />
+        <div class="error-msg" id="err-engine" aria-live="polite"></div>
+      </div>
+
+      <!-- Field 2: Fuel Consumption Combined -->
+      <div class="input-group">
+        <label for="fuelConsumption">
+          Fuel Consumption Combined (L/100km)
+          <span class="range-hint">Range: 4.1 – 30.6</span>
+        </label>
+        <input
+          id="fuelConsumption"
+          class="input-field"
+          type="number"
+          min="4.1"
+          max="30.6"
+          step="0.1"
+          placeholder="e.g. 11.5"
+          autocomplete="off"
+        />
+        <div class="error-msg" id="err-fuel" aria-live="polite"></div>
+      </div>
+
+      <!-- Submit -->
+      <button id="predictBtn" class="btn-predict" type="button">
+        <span class="btn-text">🔮 &nbsp;Predict CO₂ Emission</span>
+        <span class="spinner"></span>
+      </button>
+
+      <p class="btn-note">
+        Backend prediction coming soon — placeholder active
+      </p>
+    </div>
+
+    <!-- SECTION 3 — Prediction Result -->
+    <div class="card result-card" id="result-card">
+      <h2 class="card-title" style="position:absolute;top:20px;left:24px;">
+        <span class="icon icon-green">📊</span>
+        Prediction Result
+      </h2>
+
+      <!-- Empty state -->
+      <div class="result-empty" id="result-empty">
+        <div class="empty-icon">🌿</div>
+        <p>Enter values and click Predict<br/>to see your result here.</p>
+      </div>
+
+      <!-- Loading skeleton -->
+      <div class="result-skeleton" id="result-skeleton">
+        <div class="skeleton-line" style="width:60%;height:14px;"></div>
+        <div class="skeleton-line" style="width:40%;height:50px;"></div>
+        <div class="skeleton-line" style="width:50%;height:12px;"></div>
+      </div>
+
+      <!-- Result display -->
+      <div class="result-display" id="result-display">
+        <div class="result-label">Predicted CO₂ Emission</div>
+        <div class="result-value" id="result-value">—</div>
+        <div class="result-unit">grams per kilometre (g/km)</div>
+        <div class="result-bar">
+          <div class="result-bar-fill" id="result-bar-fill"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       SECTION 4 — Model Information Table
+  ══════════════════════════════════════ -->
+  <div class="card section" id="model-info">
+    <h2 class="card-title">
+      <span class="icon icon-purple">🧠</span>
+      Model Information
+    </h2>
+
+    <div class="table-wrapper">
+      <table aria-label="Model Information">
+        <thead>
+          <tr>
+            <th>Property</th>
+            <th>Value</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Algorithm</td>
+            <td><span class="val-mono">Simple Linear Regression</span></td>
+          </tr>
+          <tr>
+            <td>Library</td>
+            <td><span class="val-mono">scikit-learn 1.6.0</span></td>
+          </tr>
+          <tr>
+            <td>Dataset</td>
+            <td><span class="val-mono">FuelConsumptionCo2.csv</span></td>
+          </tr>
+          <tr>
+            <td>Dataset Source</td>
+            <td>
+              <a href="https://cf-courses-data.s3.us.cloud-object-storage.appdomain.cloud/IBMDeveloperSkillsNetwork-ML0101EN-SkillsNetwork/labs/Module%202/data/FuelConsumptionCo2.csv"
+                 target="_blank" rel="noopener noreferrer"
+                 style="color:var(--accent-blue);font-size:.82rem;">
+                IBM Skills Network (open.canada.ca)
+              </a>
+            </td>
+          </tr>
+          <tr>
+            <td>Features Used</td>
+            <td><span class="val-mono">ENGINESIZE, FUELCONSUMPTION_COMB</span></td>
+          </tr>
+          <tr>
+            <td>Target Variable</td>
+            <td><span class="val-mono">CO2EMISSIONS (g/km)</span></td>
+          </tr>
+          <tr>
+            <td>Train / Test Split</td>
+            <td><span class="val-mono">80% / 20%</span></td>
+          </tr>
+          <tr>
+            <td>Random State</td>
+            <td><span class="val-mono">42</span></td>
+          </tr>
+          <tr>
+            <td>Total Samples</td>
+            <td><span class="val-mono">1 067</span></td>
+          </tr>
+          <tr>
+            <td>Engine Size Model — Coefficient</td>
+            <td><span class="val-mono">≈ 38.99</span></td>
+          </tr>
+          <tr>
+            <td>Engine Size Model — Intercept</td>
+            <td><span class="val-mono">≈ 126.29</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       SECTION 5 — Accuracy Metrics
+  ══════════════════════════════════════ -->
+  <div class="card section" id="accuracy-metrics">
+    <h2 class="card-title">
+      <span class="icon icon-orange">📈</span>
+      Accuracy Metrics
+    </h2>
+
+    <div class="metrics-grid">
+
+      <!-- Table A: ENGINESIZE -->
+      <div>
+        <div class="metric-table-title">
+          <span class="badge badge-blue">Model A</span>
+          ENGINESIZE Feature
+        </div>
+        <div class="table-wrapper">
+          <table aria-label="ENGINESIZE Model Metrics">
+            <thead>
+              <tr><th>Metric</th><th>Value</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>MAE</td>
+                <td><span id="eng-mae" class="val-mono">24.10</span></td>
+              </tr>
+              <tr>
+                <td>MSE</td>
+                <td><span id="eng-mse" class="val-mono">985.94</span></td>
+              </tr>
+              <tr>
+                <td>RMSE</td>
+                <td><span id="eng-rmse" class="val-mono">31.40</span></td>
+              </tr>
+              <tr>
+                <td>R² Score</td>
+                <td>
+                  <span id="eng-r2" class="val-mono">0.76</span>
+                  <span class="badge badge-green" style="margin-left:6px;">Good</span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Table B: FUELCONSUMPTION_COMB -->
+      <div>
+        <div class="metric-table-title">
+          <span class="badge badge-purple">Model B</span>
+          FUELCONSUMPTION_COMB Feature
+        </div>
+        <div class="table-wrapper">
+          <table aria-label="FUELCONSUMPTION_COMB Model Metrics">
+            <thead>
+              <tr><th>Metric</th><th>Value</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>MAE</td>
+                <td><span id="fuel-mae" class="placeholder-val">— start server</span></td>
+              </tr>
+              <tr>
+                <td>MSE</td>
+                <td><span id="fuel-mse" class="placeholder-val">— start server</span></td>
+              </tr>
+              <tr>
+                <td>RMSE</td>
+                <td><span id="fuel-rmse" class="placeholder-val">— start server</span></td>
+              </tr>
+              <tr>
+                <td>R² Score</td>
+                <td><span id="fuel-r2" class="placeholder-val">— start server</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+
+    <p class="metrics-note">
+      ✏️ Model B metrics: run <code style="font-family:monospace;background:rgba(255,255,255,.06);padding:1px 6px;border-radius:4px;">Simple-Linear-Regression.ipynb</code>
+      and fill in the values above.
+    </p>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       FOOTER
+  ══════════════════════════════════════ -->
+  <footer class="app-footer">
+    <p>
+      🌿 CO₂ Emission Predictor &nbsp;·&nbsp;
+      Beginner ML Portfolio &nbsp;·&nbsp;
+      Dataset: <a href="http://open.canada.ca/data/en/dataset/98f1a129-f628-4ce4-b24d-6f16bf24dd64"
+                  target="_blank" rel="noopener noreferrer">
+        Government of Canada Open Data
+      </a>
+    </p>
+  </footer>
+
+</div><!-- /app-wrapper -->
+
+<!-- Error Toast -->
+<div class="toast" id="error-toast" role="alert" aria-live="assertive">
+  <span class="toast-icon">⚠️</span>
+  <span id="toast-msg">Something went wrong. Please try again.</span>
+</div>
+
+<!-- JavaScript -->
+<script src="script.js"></script>
+</body>
+</html>
